@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chuck-A-Luck Web</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+</head>
+<body>
+    <h1>Chuck-A-Luck (Web Version)</h1>
+    <py-script>
+        import random
+
+        money = 500
+        print("CHOOSE A NUMBER FROM 1 TO 6. I WILL ROLL 3 DICE.")
+        print("IF YOUR NUMBER MATCHES 1 DIE, I PAY OFF EVEN MONEY.")
+        print("TWO DICE, 2:1    3 DICE, 3:1")
+
+        while money > 0:
+            bet = int(input(f"YOU HAVE ${money}. MAKE A BET: "))
+            number = int(input("CHOOSE A NUMBER: "))
+            dice = [random.randint(1,6) for _ in range(3)]
+            matches = sum(1 for d in dice if d == number)
+            if matches == 0:
+                money -= bet
+            elif matches == 1:
+                money += bet
+            elif matches == 2:
+                money += bet * 2
+            else:
+                money += bet * 3
+            print(f"Dice: {dice}, Matches: {matches}, Money: {money}")
+    </py-script>
+</body>
+</html>
