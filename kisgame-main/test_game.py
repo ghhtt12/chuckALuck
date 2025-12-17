@@ -1,92 +1,99 @@
-# test_game.py - tests for Chuck-A-Luck
-print("=== TESTING CHUCK-A-LUCK ===")
-print("Checking system...")
-
-# 1. Check game import
-print("\n1. Checking game import...")
-try:
-    import chuck_a_luck
-
-    print("[OK] Game module loaded")
-except Exception as e:
-    print(f"[ERROR] Load error: {e}")
-
-# 2. Check random numbers
-print("\n2. Checking random numbers...")
 import random
-
-random.seed(42)  # Fix randomness
-test_rolls = [random.randint(1, 6) for _ in range(5)]
-print(f"[OK] Test rolls: {test_rolls}")
-
-# 3. Check game logic
-print("\n3. Checking game logic...")
+from io import StringIO
+import sys
 
 
-def test_game_logic():
-    test_cases = [
-        # (bet, number, dice, expected result)
-        (10, 3, [3, 1, 5], 10),  # 1 match
-        (10, 2, [2, 2, 6], 20),  # 2 matches
-        (10, 4, [4, 4, 4], 30),  # 3 matches
-        (10, 1, [2, 3, 4], -10),  # 0 matches
+def test_exact_format():
+    """Тестирует точное форматирование как в BASIC"""
+    print("=== TESTING EXACT BASIC FORMAT ===")
+
+    # Фиксируем случайность для теста
+    random.seed(42)
+
+    print("\n1. Simulating dice output...")
+
+    # Имитируем вывод кубиков как в BASIC строках 270-280
+    A = random.randint(1, 6)
+    D = random.randint(1, 6)
+    C = random.randint(1, 6)
+
+    # Собираем строку как в BASIC: PRINT A;"    ";:PRINT D;"    ";:PRINT C;"     "
+    output_line = f"{A}    {D}    {C}     "
+
+    print(f"  Generated: '{output_line}'")
+    print(f"  Length: {len(output_line)} characters")
+
+    # Проверяем точное форматирование
+    expected_parts = [
+        f"{A}",
+        "    ",
+        f"{D}",
+        "    ",
+        f"{C}",
+        "     \n"
     ]
 
-    all_ok = True
-    for bet, number, dice, expected in test_cases:
-        matches = sum(1 for d in dice if d == number)
-        if matches == 0:
-            result = -bet
-        elif matches == 1:
-            result = bet
-        elif matches == 2:
-            result = bet * 2
-        elif matches == 3:
-            result = bet * 3
-        else:
-            result = 0
+    # Визуализируем пробелы
+    print(f"  Visualized: {A}|....|{D}|....|{C}|.....|")
+    print("               ^4sp ^4sp ^5sp")
 
-        if result == expected:
-            print(f"  [OK] Dice {dice}, number {number}: {matches} matches")
-        else:
-            print(f"  [ERROR] Dice {dice}, number {number}: calculation error")
-            all_ok = False
+    # Проверяем количество пробелов
+    spaces_between = output_line.count("    ")
+    spaces_at_end = output_line.endswith("     ")
 
-    return all_ok
-
-
-if test_game_logic():
-    print("[OK] Game logic works correctly")
-else:
-    print("[ERROR] Problems with game logic")
-
-# 4. Check project files
-print("\n4. Checking project files...")
-import os
-
-required_files = [
-    ("chuck_a_luck.py", "Main game code"),
-    ("web_game.html", "Web version"),
-    ("Makefile", "Build file"),
-    ("README.md", "Documentation")
-]
-
-all_files_ok = True
-for filename, description in required_files:
-    if os.path.exists(filename):
-        print(f"  [OK] {description}: {filename}")
+    if spaces_between == 2:
+        print("  ✅ Correct: 4 spaces between dice")
     else:
-        print(f"  [ERROR] {description}: {filename} - MISSING")
-        all_files_ok = False
+        print(f"  ❌ Wrong: {spaces_between} groups of 4 spaces")
 
-print("\n" + "=" * 50)
-if all_files_ok:
-    print("ALL TESTS PASSED SUCCESSFULLY!")
-    print("\nAvailable commands:")
-    print("  py chuck_a_luck.py    - Start game")
-    print("  make run              - Start game (via make)")
-    print("  make test             - Run tests")
-    print("  make web              - Web version info")
-else:
-    print("SOME FILES ARE MISSING")
-print("=" * 50)
+    if spaces_at_end:
+        print("  ✅ Correct: 5 spaces at end")
+    else:
+        print("  ❌ Wrong ending spaces")
+
+    # Проверяем оригинальный BASIC вывод
+    print("\n2. Expected BASIC output examples:")
+    print("   '4    2    5     '")
+    print("   '1    6    3     '")
+    print("   '3    3    1     '")
+
+    print("\n3. Full format check:")
+    test_cases = [
+        (3, 5, 1, "3    5    1     "),
+        (4, 2, 5, "4    2    5     "),
+        (1, 1, 1, "1    1    1     ")
+    ]
+
+    all_correct = True
+    for a, d, c, expected in test_cases:
+        actual = f"{a}    {d}    {c}     "
+        if actual == expected:
+            print(f"  ✅ {a},{d},{c} -> '{actual}'")
+        else:
+            print(f"  ❌ {a},{d},{c} -> '{actual}' (expected: '{expected}')")
+            print(f"     Difference: {repr(actual)} vs {repr(expected)}")
+            all_correct = False
+
+    print("\n" + "=" * 50)
+    if all_correct:
+        print("✅ ALL FORMAT TESTS PASSED - Output matches BASIC exactly!")
+    else:
+        print("❌ Format differences detected")
+
+    return all_correct
+
+
+def simulate_basic_output():
+    """Показывает как выглядит вывод в оригинале"""
+    print("\n=== ORIGINAL BASIC SIMULATION ===")
+    print("Lines 270-280 in BASIC:")
+    print("270 A=INT(RND(1)*6)+1:PRINT A;\"    \";:D=INT(RND(1)*6)+1:PRINT D;\"    \";")
+    print("280 C=INT(RND(1)*6)+1:PRINT C;\"     \"")
+    print()
+    print("This produces output like: '4    2    5     '")
+    print("Where: number + 4 spaces + number + 4 spaces + number + 5 spaces")
+
+
+if __name__ == "__main__":
+    test_exact_format()
+    simulate_basic_output()

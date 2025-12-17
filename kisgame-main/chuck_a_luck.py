@@ -1,64 +1,95 @@
 import random
-import sys
 
-def play_chuck_a_luck(start_money=500):
-    money = start_money
-    print(" " * 20 + "CHUCK-A-LUCK")
-    print(" " * 18 + "CREATIVE COMPUTING")
-    print(" " * 16 + "MORRISTOWN, NEW JERSEY\n")
 
-    print("CHOOSE A NUMBER FROM 1 TO 6. I WILL ROLL 3 DICE.")
-    print("IF YOUR NUMBER MATCHES 1 DIE, I PAY OFF EVEN MONEY.")
-    print("TWO DICE, 2:1    3 DICE, 3:1\n")
+class ChuckALuckGame:
+    """Основная логика игры, независимая от интерфейса"""
 
-    while money > 0:
-        print(f"YOU HAVE ${money}. MAKE A BET.")
+    def __init__(self, start_money=500):
+        self.money = start_money
+        self.bet = 0
+        self.number = 0
+        self.dice = []
+        self.matches = 0
+        self.game_over = False
+
+    def make_bet(self, bet_amount):
+        """Проверка и установка ставки"""
         try:
-            bet = int(input())
+            bet = float(bet_amount)
         except ValueError:
-            print("DON'T GET CUTE!!!")
-            continue
+            return False, "DON'T GET CUTE!!!"
 
-        if bet > money:
-            print("I DON'T TAKE I.O.U's !!!!")
-            continue
+        if bet > self.money:
+            return False, "I DON'T TAKE I.O.U's !!!!"
         if bet <= 0 or bet * 100 != int(bet * 100):
-            print("DON'T GET CUTE!!!")
-            continue
+            return False, "DON'T GET CUTE!!!"
 
-        print("CHOOSE A NUMBER")
+        self.bet = bet
+        return True, ""
+
+    def choose_number(self, number):
+        """Проверка и установка числа"""
         try:
-            number = int(input())
+            num = float(number)
         except ValueError:
-            print("CHEATER!!!!!")
-            continue
+            return False, "CHEATER'!!!!!"
 
-        if not (1 <= number <= 6):
-            print("CHEATER!!!!!")
-            continue
+        if int(num) != num or num < 1 or num > 6:
+            return False, "CHEATER'!!!!!"
 
-        dice = [random.randint(1, 6) for _ in range(3)]
-        print(f"{dice[0]}    {dice[1]}    {dice[2]}")
+        self.number = int(num)
+        return True, ""
 
-        matches = sum(1 for d in dice if d == number)
-        print(f"YOU'VE MATCHED {matches} TIMES.")
+    def roll_dice(self):
+        """Бросок кубиков и подсчет результатов"""
+        # Случайные кубики как в BASIC
+        a = random.randint(1, 6)
+        d = random.randint(1, 6)
+        c = random.randint(1, 6)
+        self.dice = [a, d, c]
 
-        if matches == 0:
-            print(f"YOU LOSE ${bet}")
-            money -= bet
-        elif matches == 1:
-            print(f"YOU'VE WON ${bet}")
-            money += bet
-        elif matches == 2:
-            print(f"YOU'VE WON ${bet * 2}")
-            money += bet * 2
-        elif matches == 3:
-            print(f"YOU'VE WON ${bet * 3}")
-            money += bet * 3
+        # Подсчет совпадений
+        self.matches = 0
+        if a == self.number:
+            self.matches += 1
+        if d == self.number:
+            self.matches += 1
+        if c == self.number:
+            self.matches += 1
 
-        if money <= 0:
-            print("\nGAME OVER! YOU'RE BROKE!")
-            break
+        # Вычисление выигрыша/проигрыша
+        if self.matches == 0:
+            self.money -= self.bet
+            result = f"YOU LOOSE ${int(self.bet)}"
+        elif self.matches == 1:
+            self.money += self.bet
+            result = f"YOU'VE WON ${int(self.bet)}"
+        elif self.matches == 2:
+            self.money += self.bet * 2
+            result = f"YOU'VE WON ${int(self.bet * 2)}"
+        elif self.matches == 3:
+            self.money += self.bet * 3
+            result = f"YOU'VE WON ${int(self.bet * 3)}"
 
-if __name__ == "__main__":
-    play_chuck_a_luck()
+        # Проверка конца игры
+        if self.money <= 0:
+            self.game_over = True
+            result += "\n\nGAME OVER"
+
+        return result
+
+    def get_dice_output(self):
+        """Форматирование вывода кубиков как в BASIC"""
+        if self.dice:
+            return f"{self.dice[0]}    {self.dice[1]}    {self.dice[2]}     "
+        return ""
+
+    def get_money(self):
+        return self.money
+
+    def is_game_over(self):
+        return self.game_over
+
+    def reset(self):
+        """Сброс игры"""
+        self.__init__()
